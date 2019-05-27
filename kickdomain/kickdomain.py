@@ -1,5 +1,6 @@
-import requests,re,sys,argparse
-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import requests,re,argparse
 csrftoken=r'[a-zA-Z0-9]{32}'
 def clear_url(target):
 	return re.sub('.*www\.','',target,1).split('/')[0].strip()
