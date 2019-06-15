@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import requests,re,argparse
+import providers
+import dns.resolver
 csrftoken=r'[a-zA-Z0-9]{32}'
 def clear_url(target):
 	return re.sub('.*www\.','',target,1).split('/')[0].strip()
@@ -29,9 +31,54 @@ def domains_from_virustotal(target):
     return finddomains
 def getSubdomains(target):
     return remove_duplicate(domains_from_crt_sh(target)+domains_from_dnsdumpster(target)+domains_from_virustotal(target))
+def takeover_check(subdomains):
+    result=[]
+    for subdomain in subdomains:
+        try:
+           answer=dns.resolver.query(subdomain, "CNAME")
+           for i in answer:
+               cname=str(i)
+        except:
+              cname=''
+        try:
+            data=requests.get('http://'+subdomain).content
+        except:
+            data=''
+        pro_list=[]
+        res_list=[]
+        c=False
+        d=False
+        p=False
+        for k in providers.provider:
+            pro_list.append(k['cname'])
+            res_list.append(k['response'])
+        for t in pro_list:
+            for w in t:
+                if cname.__contains__(w):
+                   c=True
+        for s in res_list:
+            for f in s:
+                if data.__contains__(f):
+                    d=True
+        if c and d:
+            p=True
+        result=result+[(subdomain,p)]
+    return result
 if __name__=='__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument("-u", "--url", required=True,help="Please enter target Url  without http or https")
+    ap.add_argument("-t", "--takeover", required=False,help="True or False")
     args = vars(ap.parse_args())
-    for domain in getSubdomains(clear_url(args['url'])):
+    if args['url'].startswith('http'):
+        print("Enter url without http and www")
+        exit()
+    domains=getSubdomains(clear_url(args['url']))
+    for domain in domains:
         print(domain)
+    if args['takeover']:
+       for i in  takeover_check(domains):
+           if i[1]:
+               print(i[0]+' is vulnerable to takeover')
+           else:
+               print(i[0]+' is not vulnerable to takeover')
+       

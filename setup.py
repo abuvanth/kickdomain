@@ -12,7 +12,7 @@ if os.path.isfile(requirementPath):
         install_requires = f.read().splitlines()
 setuptools.setup(
     name="kickdomain",
-    version="1.0.1",
+    version="1.0.2",
     author="Syed Abuthahir",
     author_email="developerabu@gmail.com",
     description="Subdomain takeover tool",
