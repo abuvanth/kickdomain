@@ -1,1 +1,1 @@
-fb_access_token='test'
+fb_access_token='test2'
