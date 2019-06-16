@@ -43,7 +43,6 @@ def domains_from_facebook(target):
 def domains_from_findsubdomains(target):
     getdomains=requests.get('https://findsubdomains.com/subdomains-of/'+target).content
     finddomains=re.findall(r'[a-z0-9\-\.]+\.'+target,getdomains)
-    print(finddomains)
     return finddomains
 def getSubdomains(target):
     return remove_duplicate(domains_from_findsubdomains(target)+domains_from_facebook(target)+domains_from_crt_sh(target)+domains_from_dnsdumpster(target)+domains_from_virustotal(target))

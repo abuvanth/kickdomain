@@ -40,5 +40,6 @@ for i in results:
     else:
 
         print(i[0]+' not vulnerable to Takeover')
-        ```
+
+```
     
