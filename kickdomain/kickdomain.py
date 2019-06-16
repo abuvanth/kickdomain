@@ -32,6 +32,8 @@ def domains_from_virustotal(target):
 def domains_from_facebook(target):
     access_token=config.fb_access_token
     if access_token=='':
+       access_token=os.environ.get('FB_ACCESS_TOKEN','')
+    if access_token=='':
         print("fb access token not found")
         return []
     else:
@@ -39,7 +41,7 @@ def domains_from_facebook(target):
         finddomains=re.findall(r'[a-z0-9\-\.]+\.'+target,getdomains)
     return finddomains
 def getSubdomains(target):
-    return remove_duplicate(domains_from_crt_sh(target)+domains_from_dnsdumpster(target)+domains_from_virustotal(target))
+    return remove_duplicate(domains_from_facebook(target)+domains_from_crt_sh(target)+domains_from_dnsdumpster(target)+domains_from_virustotal(target))
 def takeover_check(subdomains):
     result=[]
     for subdomain in subdomains:
