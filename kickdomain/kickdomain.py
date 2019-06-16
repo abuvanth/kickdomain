@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import requests,re,argparse
-import providers
+import requests,re,argparse,os
+import providers,config
 import dns.resolver
 csrftoken=r'[a-zA-Z0-9]{32}'
 def clear_url(target):
@@ -13,7 +13,7 @@ def domains_from_dnsdumpster(target):
     gettoken=re.findall(csrftoken,geturl.content)
     cookie=geturl.headers['Set-Cookie']
     getcontents=requests.post('https://dnsdumpster.com/',data={'csrfmiddlewaretoken':gettoken[0],'targetip':target},headers={'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:66.0) Gecko/20100101 Firefox/66.0 Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8','Referer':'https://dnsdumpster.com/','Cookie':cookie}).content
-    subdomains=re.findall(r'[a-zA-Z0-9\.\-]+\.'+target,getcontents)
+    subdomains=re.findall(r'[a-z0-9\.\-]+\.'+target,getcontents)
     return subdomains
 def domains_from_crt_sh(target):
     subdomains = []
@@ -27,7 +27,16 @@ def domains_from_crt_sh(target):
     return subdomains
 def domains_from_virustotal(target):
     getdomains=requests.get('https://www.virustotal.com/ui/domains/'+target+'/subdomains?limit=40').content
-    finddomains=re.findall(r'[a-zA-Z0-9\-\.]+\.'+target,getdomains)
+    finddomains=re.findall(r'[a-z0-9\-\.]+\.'+target,getdomains)
+    return finddomains
+def domains_from_facebook(target):
+    access_token=config.fb_access_token
+    if access_token=='':
+        print("fb access token not found")
+        return []
+    else:
+        getdomains=requests.get('https://graph.facebook.com/v3.3/certificates?access_token='+access_token+'&pretty=0&fields=domains&query='+target+'&limit=1000').content
+        finddomains=re.findall(r'[a-z0-9\-\.]+\.'+target,getdomains)
     return finddomains
 def getSubdomains(target):
     return remove_duplicate(domains_from_crt_sh(target)+domains_from_dnsdumpster(target)+domains_from_virustotal(target))

@@ -5,4 +5,4 @@ for i in answer:
 print i'''
 from kickdomain import *
 
-print(takeover_check(['app.weeschool.com']))
+print(domains_from_facebook('uber.com'))
