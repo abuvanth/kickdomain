@@ -5,7 +5,6 @@ __pycache__/
 
 # C extensions
 *.so
-config.py
 # Distribution / packaging
 .Python
 build/
@@ -102,4 +101,3 @@ venv.bak/
 
 # mypy
 .mypy_cache/
-kickdomain/config.py
