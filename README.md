@@ -5,6 +5,10 @@ Kickdomain is a subdomain takeover checker tool
 
 pip install kickdomain
 
+add fb access token into config.py
+
+# or
+
 export FB_ACCESS_TOKEN=your_access_token (get your access token here - https://developers.facebook.com/tools/explorer/)
 
 add FB_ACCESS_TOKEN into .bashrc file
