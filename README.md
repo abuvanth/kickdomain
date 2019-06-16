@@ -5,6 +5,8 @@ Kickdomain is a subdomain takeover checker tool
 
 pip install kickdomain
 
+add your facebook access token in kickdomain/config.py (get your access token here - https://developers.facebook.com/tools/explorer/)
+
 Enumerate Subdomains only 
 
 kickdomain.py -u target.com 
