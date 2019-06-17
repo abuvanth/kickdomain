@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import requests,re,argparse,os
 from provider import providers,config
+from colorama import init, Fore, Back, Style
 import dns.resolver
 csrftoken=r'[a-zA-Z0-9]{32}'
 def clear_url(target):
@@ -39,13 +40,15 @@ def domains_from_facebook(target):
     else:
         getdomains=requests.get('https://graph.facebook.com/v3.3/certificates?access_token='+access_token+'&pretty=0&fields=domains&query='+target+'&limit=1000').content
         finddomains=re.findall(r'[a-z0-9\-\.]+\.'+target,getdomains)
+        print(finddomains)
     return finddomains
 def domains_from_findsubdomains(target):
     getdomains=requests.get('https://findsubdomains.com/subdomains-of/'+target).content
     finddomains=re.findall(r'[a-z0-9\-\.]+\.'+target,getdomains)
     return finddomains
 def getSubdomains(target):
-    return remove_duplicate(domains_from_findsubdomains(target)+domains_from_facebook(target)+domains_from_crt_sh(target)+domains_from_dnsdumpster(target)+domains_from_virustotal(target))
+    domainlist=remove_duplicate(domains_from_findsubdomains(target)+domains_from_facebook(target)+domains_from_crt_sh(target)+domains_from_dnsdumpster(target)+domains_from_virustotal(target))
+    return [x for x in domainlist if '*' not in x ]
 def takeover_check(subdomains):
     result=[]
     for subdomain in subdomains:
@@ -56,7 +59,7 @@ def takeover_check(subdomains):
         except:
               cname=''
         try:
-            data=requests.get('http://'+subdomain).content
+            data=requests.get('http://'+subdomain,timeout=10).content
         except:
             data=''
         pro_list=[]
@@ -77,6 +80,9 @@ def takeover_check(subdomains):
                     d=True
         if c and d:
             p=True
+            print(Fore.GREEN+subdomain+' is vulnerable to takeover')
+        else:
+            print(Fore.RED+subdomain+' is not vulnerable to takeover')
         result=result+[(subdomain,p)]
     return result
 if __name__=='__main__':
