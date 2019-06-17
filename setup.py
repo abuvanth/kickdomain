@@ -19,7 +19,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/abuvanth/kickdomain",
-    packages=['kickdomain','providers','config'],
+    packages=['kickdomain','kickdomain.provider'],
     install_requires=install_requires,
     scripts=['kickdomain/kickdomain.py'],
     classifiers=[
