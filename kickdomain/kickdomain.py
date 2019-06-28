@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 import requests,re,argparse,os
 from colorama import init, Fore, Back, Style
-from provider import * 
+from provider.providers import * 
+from provider.config import * 
 import dns.resolver
 csrftoken=r'[a-zA-Z0-9]{32}'
 def clear_url(target):
