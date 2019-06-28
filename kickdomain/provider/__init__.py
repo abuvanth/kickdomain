@@ -1,2 +1,3 @@
 name="provider"
-from .providers import *
+from providers import *
+from config import *
