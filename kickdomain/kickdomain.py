@@ -48,7 +48,7 @@ def domains_from_findsubdomains(target):
     return finddomains
 def getSubdomains(target):
     domainlist=remove_duplicate(domains_from_findsubdomains(target)+domains_from_facebook(target)+domains_from_crt_sh(target)+domains_from_dnsdumpster(target)+domains_from_virustotal(target))
-    return [x for x in domainlist if '*' not in x ]
+    return [x for x in domainlist if not x.startswith('*') ]
 def takeover_check(subdomains):
     result=[]
     for subdomain in subdomains:

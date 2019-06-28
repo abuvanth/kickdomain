@@ -12,11 +12,6 @@ provider=[
 		"response":["There's nothing here, yet.", "herokucdn.com/error-pages/no-such-app.html", "<title>No such app</title>"]
 	},
 	{
-		"name":"unbounce",
-		"cname":["unbouncepages.com"],
-		"response":["The requested URL / was not found on this server.", "The requested URL was not found on this server"]
-	},
-	{
 		"name":"tumblr",
 		"cname":["tumblr.com"],
 		"response":["There's nothing here.", "Whatever you were looking for doesn't currently exist at this address."]
