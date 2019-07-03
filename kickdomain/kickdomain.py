@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 import requests,re,argparse,os
 from colorama import init, Fore, Back, Style
-from provider.providers import * 
-from provider.config import * 
+from Kickdomain.provider import * 
 import dns.resolver
 csrftoken=r'[a-zA-Z0-9]{32}'
 def clear_url(target):
@@ -50,7 +49,7 @@ def domains_from_findsubdomains(target):
 def getSubdomains(target):
     domainlist=remove_duplicate(domains_from_findsubdomains(target)+domains_from_facebook(target)+domains_from_crt_sh(target)+domains_from_dnsdumpster(target)+domains_from_virustotal(target))
     return [x for x in domainlist if not x.startswith('*') ]
-def takeover_check(subdomains):
+def takeover_check(subdomains,silent=True):
     result=[]
     for subdomain in subdomains:
         try:
@@ -80,10 +79,13 @@ def takeover_check(subdomains):
                 if data.__contains__(f):
                     d=True
         if c and d:
-            p=True
-            print(Fore.GREEN+subdomain+' is vulnerable to takeover')
-        else:
-            print(Fore.RED+subdomain+' is not vulnerable to takeover')
+              p=True
+        if silent:
+           if c and d:
+              p=True
+              print(Fore.GREEN+subdomain+' is vulnerable to takeover')
+           else:
+              print(Fore.RED+subdomain+' is not vulnerable to takeover')
         result=result+[(subdomain,p)]
     return result
 if __name__=='__main__':

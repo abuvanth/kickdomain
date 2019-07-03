@@ -12,7 +12,7 @@ if os.path.isfile(requirementPath):
         install_requires = f.read().splitlines()
 setuptools.setup(
     name="kickdomain",
-    version="1.3.1",
+    version="1.3.2",
     author="Syed Abuthahir",
     author_email="developerabu@gmail.com",
     description="Subdomain takeover tool",
@@ -21,7 +21,7 @@ setuptools.setup(
     url="https://github.com/abuvanth/kickdomain",
     packages=setuptools.find_packages(),
     install_requires=install_requires,
-    scripts=['kickdomain/kickdomain.py'],
+    scripts=['kick-domain/kickdomain.py'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
