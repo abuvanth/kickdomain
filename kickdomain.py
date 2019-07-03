@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import requests,re,argparse,os
 from colorama import init, Fore, Back, Style
-from Kickdomain.provider import * 
+from provider import * 
 import dns.resolver
 csrftoken=r'[a-zA-Z0-9]{32}'
 def clear_url(target):
