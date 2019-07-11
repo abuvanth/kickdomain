@@ -11,6 +11,8 @@ add fb access token into config.py
 
 export FB_ACCESS_TOKEN=your_access_token (get your access token here - https://developers.facebook.com/tools/explorer/)
 
+or 
+
 add FB_ACCESS_TOKEN into .bashrc file
 
 source .bashrc
@@ -22,6 +24,10 @@ kickdomain.py -u target.com
 Enable Takeover check
 
 kickdomain.py -u target.com -t 1
+
+Enable Port scan for each subdomain 
+
+kickdomain.py -u target.com -p 1
 
 # Use kickdomain as a module
 

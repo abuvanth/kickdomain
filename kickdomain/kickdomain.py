@@ -10,7 +10,7 @@ def filter_live(domainlist):
     for i in domainlist:
         try:
             result=scanport(i)
-            if len(data)>0:
+            if len(result)>0 and result[0]!='service down':
                 #print(i+' is live')
                 livedomains.append(i)
         except:
@@ -70,8 +70,12 @@ def domains_from_findsubdomains(target):
     getdomains=requests.get('https://findsubdomains.com/subdomains-of/'+target).content
     finddomains=re.findall(r'[a-z0-9\-\.]+\.'+target,getdomains)
     return finddomains
+def domains_from_threatcrowd(target):
+    getdomains=requests.get('https://www.threatcrowd.org/searchApi/v2/domain/report/?domain='+target).content
+    finddomains=re.findall(r'[a-z0-9\-\.]+\.'+target,getdomains)
+    return finddomains
 def getSubdomains(target):
-    domainlist=remove_duplicate(domains_from_bufferover(target)+domains_from_findsubdomains(target)+domains_from_facebook(target)+domains_from_crt_sh(target)+domains_from_dnsdumpster(target)+domains_from_virustotal(target))
+    domainlist=filter_live(remove_duplicate(domains_from_threatcrowd(target)+domains_from_bufferover(target)+domains_from_findsubdomains(target)+domains_from_facebook(target)+domains_from_crt_sh(target)+domains_from_dnsdumpster(target)+domains_from_virustotal(target)))
     return [x for x in domainlist if not x.startswith('*') ]
 def takeover_check(subdomains,silent=True):
     result=[]
@@ -123,7 +127,7 @@ if __name__=='__main__':
         print("Enter url without http and www")
         exit()
     domains=getSubdomains(clear_url(args['url']))
-    print(clear_url(args['url'])+' has '+str(len(domains))+' unique subdomains')
+    print(clear_url(args['url'])+' has '+str(len(domains))+' unique live subdomains')
     for domain in domains:
         print(domain)
     if args['portscan']:
