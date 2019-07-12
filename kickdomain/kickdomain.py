@@ -4,6 +4,10 @@ import requests,re,argparse,os
 from colorama import init, Fore, Back, Style
 from provider import *
 import dns.resolver
+import time
+import censys.certificates
+import censys.ipv4
+import censys
 sub_regex=r'[a-z0-9\.\-]+\.'
 def filter_live(domainlist):
     livedomains=[]
@@ -27,6 +31,29 @@ def clear_url(target):
 	return re.sub('.*www\.','',target,1).split('/')[0].strip()
 def remove_duplicate(x):
     return list(dict.fromkeys(x))
+def domains_from_censys(domain):
+    try:
+        censys_id,censys_secret=config.censys_id,config.censys_secret
+        if censys_id=='' and censys_secret=='':
+            censys_id=os.environ.get('CENSYS_ID','')
+            censys_secret=os.environ.get('CENSYS_SECRET','')
+        if censys_secret=='':
+           print("Censys keys not found")
+           return []
+        censys_cert = censys.certificates.CensysCertificates(api_id=censys_id,api_secret=censys_secret)
+        cert_query = 'parsed.names: %s' % domain
+        cert_search_results = censys_cert.search(cert_query, fields=['parsed.names'])
+ 
+        subdomains = []
+        for s in cert_search_results:
+            subdomains.extend(s['parsed.names'])
+ 
+        return [ subdomain for subdomain in subdomains if  subdomain.endswith(domain) ]
+    except censys.base.CensysUnauthorizedException:
+        print("Censys keys not found")
+        return subdomains
+    except censys.base.CensysRateLimitExceededException:
+        return [ subdomain for subdomain in subdomains if  subdomain.endswith(domain) ]
 def domains_from_dnsdumpster(target):
     try:
        csrftoken=r'[a-zA-Z0-9]{32}'
@@ -86,9 +113,13 @@ def domains_from_threatcrowd(target):
     getdomains=requests.get('https://www.threatcrowd.org/searchApi/v2/domain/report/?domain='+target).content
     finddomains=re.findall(sub_regex+target,getdomains)
     return finddomains
+def domains_from_certspotter(target):
+    getdomains=requests.get('https://certspotter.com/api/v0/certs?domain='+target).content
+    finddomains=re.findall(sub_regex+target,getdomains)
+    return finddomains
 def getSubdomains(target):
-    domainlist=remove_duplicate(domains_from_shodan(target)+domains_from_threatcrowd(target)+domains_from_bufferover(target)+domains_from_findsubdomains(target)+domains_from_facebook(target)+domains_from_crt_sh(target)+domains_from_dnsdumpster(target)+domains_from_virustotal(target))
-    return [x for x in domainlist if not x.startswith('*') ]
+    domainlist=remove_duplicate(domains_from_censys(target)+domains_from_certspotter(target)+domains_from_shodan(target)+domains_from_threatcrowd(target)+domains_from_bufferover(target)+domains_from_findsubdomains(target)+domains_from_facebook(target)+domains_from_crt_sh(target)+domains_from_dnsdumpster(target)+domains_from_virustotal(target))
+    return [x.strip('.') for x in domainlist if not x.startswith('*') ]
 def takeover_check(subdomains,silent=True):
     result=[]
     for subdomain in subdomains:
@@ -139,7 +170,7 @@ if __name__=='__main__':
         print("Enter url without http and www")
         exit()
     domains=getSubdomains(clear_url(args['url']))
-    print(clear_url(args['url'])+' has '+str(len(domains))+' unique live subdomains')
+    print(clear_url(args['url'])+' has '+str(len(domains))+' unique  subdomains')
     for domain in domains:
         print(domain)
     if args['portscan']:
