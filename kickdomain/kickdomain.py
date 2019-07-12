@@ -4,7 +4,7 @@ import requests,re,argparse,os
 from colorama import init, Fore, Back, Style
 from provider import *
 import dns.resolver
-csrftoken=r'[a-zA-Z0-9]{32}'
+sub_regex=r'[a-z0-9\.\-]+\.'
 def filter_live(domainlist):
     livedomains=[]
     for i in domainlist:
@@ -29,11 +29,12 @@ def remove_duplicate(x):
     return list(dict.fromkeys(x))
 def domains_from_dnsdumpster(target):
     try:
+       csrftoken=r'[a-zA-Z0-9]{32}'
        geturl=requests.get('https://dnsdumpster.com/') 
        gettoken=re.findall(csrftoken,geturl.content)
        cookie=geturl.headers['Set-Cookie']
        getcontents=requests.post('https://dnsdumpster.com/',data={'csrfmiddlewaretoken':gettoken[0],'targetip':target},headers={'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:66.0) Gecko/20100101 Firefox/66.0 Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8','Referer':'https://dnsdumpster.com/','Cookie':cookie}).content
-       subdomains=re.findall(r'[a-z0-9\.\-]+\.'+target,getcontents)
+       subdomains=re.findall(sub_regex+target,getcontents)
        return subdomains
     except:
        return []
@@ -49,11 +50,22 @@ def domains_from_crt_sh(target):
     return subdomains
 def domains_from_virustotal(target):
     getdomains=requests.get('https://www.virustotal.com/ui/domains/'+target+'/subdomains?limit=40').content
-    finddomains=re.findall(r'[a-z0-9\-\.]+\.'+target,getdomains)
+    finddomains=re.findall(sub_regex+target,getdomains)
+    return finddomains
+def domains_from_shodan(target):
+    api_key=config.shodan_api_key
+    if api_key=='':
+       api_key=os.environ.get('SHODAN_API_KEY','')
+    if api_key=='':
+        print("shodan api key not found")
+        return []
+    else:
+        getdomains=requests.get('https://api.shodan.io/shodan/host/search?key='+api_key+'&query=ssl:'+target).content
+        finddomains=re.findall(sub_regex+target,getdomains)
     return finddomains
 def domains_from_bufferover(target):
     getdomains=requests.get('https://dns.bufferover.run/dns?q='+target).content
-    finddomains=re.findall(r'[a-z0-9\-\.]+\.'+target,getdomains)
+    finddomains=re.findall(sub_regex+target,getdomains)
     return finddomains
 def domains_from_facebook(target):
     access_token=config.fb_access_token
@@ -64,18 +76,18 @@ def domains_from_facebook(target):
         return []
     else:
         getdomains=requests.get('https://graph.facebook.com/v3.3/certificates?access_token='+access_token+'&pretty=0&fields=domains&query='+target+'&limit=1000').content
-        finddomains=re.findall(r'[a-z0-9\-\.]+\.'+target,getdomains)
+        finddomains=re.findall(sub_regex+target,getdomains)
     return finddomains
 def domains_from_findsubdomains(target):
     getdomains=requests.get('https://findsubdomains.com/subdomains-of/'+target).content
-    finddomains=re.findall(r'[a-z0-9\-\.]+\.'+target,getdomains)
+    finddomains=re.findall(sub_regex+target,getdomains)
     return finddomains
 def domains_from_threatcrowd(target):
     getdomains=requests.get('https://www.threatcrowd.org/searchApi/v2/domain/report/?domain='+target).content
-    finddomains=re.findall(r'[a-z0-9\-\.]+\.'+target,getdomains)
+    finddomains=re.findall(sub_regex+target,getdomains)
     return finddomains
 def getSubdomains(target):
-    domainlist=filter_live(remove_duplicate(domains_from_threatcrowd(target)+domains_from_bufferover(target)+domains_from_findsubdomains(target)+domains_from_facebook(target)+domains_from_crt_sh(target)+domains_from_dnsdumpster(target)+domains_from_virustotal(target)))
+    domainlist=remove_duplicate(domains_from_shodan(target)+domains_from_threatcrowd(target)+domains_from_bufferover(target)+domains_from_findsubdomains(target)+domains_from_facebook(target)+domains_from_crt_sh(target)+domains_from_dnsdumpster(target)+domains_from_virustotal(target))
     return [x for x in domainlist if not x.startswith('*') ]
 def takeover_check(subdomains,silent=True):
     result=[]
