@@ -106,7 +106,7 @@ def domains_from_facebook(target):
         finddomains=re.findall(sub_regex+target,getdomains)
     return finddomains
 def domains_from_findsubdomains(target):
-    getdomains=requests.get('https://findsubdomains.com/subdomains-of/'+target).content
+    getdomains=requests.get('https://spyse.com/search/subdomain?q='+target).content
     finddomains=re.findall(sub_regex+target,getdomains)
     return finddomains
 def domains_from_threatcrowd(target):
