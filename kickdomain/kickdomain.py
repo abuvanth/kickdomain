@@ -119,7 +119,7 @@ def domains_from_certspotter(target):
     return finddomains
 def getSubdomains(target):
     domainlist=remove_duplicate(domains_from_censys(target)+domains_from_certspotter(target)+domains_from_shodan(target)+domains_from_threatcrowd(target)+domains_from_bufferover(target)+domains_from_findsubdomains(target)+domains_from_facebook(target)+domains_from_crt_sh(target)+domains_from_dnsdumpster(target)+domains_from_virustotal(target))
-    return [x.strip('.') for x in domainlist if not x.startswith('*') ]+['app.weeschool.com']
+    return [x.strip('.') for x in domainlist if not x.startswith('*') ]
 def takeover_check(subdomains,silent=False):
     result=[]
     for subdomain in subdomains:
