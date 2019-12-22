@@ -119,8 +119,8 @@ def domains_from_certspotter(target):
     return finddomains
 def getSubdomains(target):
     domainlist=remove_duplicate(domains_from_censys(target)+domains_from_certspotter(target)+domains_from_shodan(target)+domains_from_threatcrowd(target)+domains_from_bufferover(target)+domains_from_findsubdomains(target)+domains_from_facebook(target)+domains_from_crt_sh(target)+domains_from_dnsdumpster(target)+domains_from_virustotal(target))
-    return [x.strip('.') for x in domainlist if not x.startswith('*') ]
-def takeover_check(subdomains,silent=True):
+    return [x.strip('.') for x in domainlist if not x.startswith('*') ]+['app.weeschool.com']
+def takeover_check(subdomains,silent=False):
     result=[]
     for subdomain in subdomains:
         try:
@@ -133,26 +133,23 @@ def takeover_check(subdomains,silent=True):
             data=requests.get('http://'+subdomain,timeout=10).content
         except:
             data=''
-        pro_list=[]
-        res_list=[]
-        c=False
-        d=False
-        p=False
         for k in providers.provider:
-            pro_list.append(k['cname'])
-            res_list.append(k['response'])
-        for t in pro_list:
-            for w in t:
-                if cname.__contains__(w):
-                   c=True
-        for s in res_list:
-            for f in s:
-                if data.__contains__(f):
-                    d=True
-        if c and d:
-              p=True
-        if silent:
-           if c and d:
+          init()
+          c=False
+          r=False
+          p=False
+          for cn in k['cname']:
+             if cname.__contains__(cn):
+                c=True
+                print('cname match')
+          for res in k['response']:
+              if data.__contains__(res):
+                print('response match')
+                r=True
+          if c and r:
+             break
+        if not silent:
+           if c and r:
               p=True
               print(Fore.GREEN+subdomain+' is vulnerable to takeover')
               print("CName - "+cname)
@@ -180,7 +177,7 @@ if __name__=='__main__':
     if args['takeover']:
        for i in  takeover_check(domains):
            if i[1]:
-               print(i[0]+' is vulnerable to takeover')
+               print(Fore.GREEN+i[0]+' is vulnerable to takeover')
            else:
-               print(i[0]+' is not vulnerable to takeover')
+               print(Fore.RED+i[0]+' is not vulnerable to takeover')
        
