@@ -49,3 +49,6 @@ for i in results:
 
 ```
     
+**Sources to be implemented**
+https://spyse.com/  API
+https://riddler.io/ API
